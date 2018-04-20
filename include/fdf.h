@@ -47,9 +47,9 @@ typedef struct		s_image
 
 typedef struct 		s_transform
 {
-	float			x_shift;
-	float			y_shift;
-	float			zoom;
+	double			x_shift;
+	double			y_shift;
+	double			zoom;
 }					t_transform;
 
 
@@ -71,13 +71,12 @@ typedef struct		s_app
 	t_mlx			mlx;
 	t_image			frame;
 	t_transform		transform;
-    int             gradient_coloring;
-    t_rgb         color_max;
-    t_rgb         color_min;
-    float           hue_min;
-    float           hue_max;
-    int             perception_speed;
-    char            key_mask[282];
+	int				gradient_coloring;
+	t_rgb			color_max;
+	t_rgb			color_min;
+	float			hue_min;
+	float			hue_max;
+	char			key_mask[282];
 	int				array_size;
 	t_rgb			white_color;
 	t_timer 		timer;
@@ -85,6 +84,7 @@ typedef struct		s_app
 	int				mouse_y;
 	int				zoom_mouse_x;
 	int				zoom_mouse_y;
+	int				kMaxIteration;
 	t_cl			cl;
 	t_fractal		current_fractal;
 	int				update_mouse;

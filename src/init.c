@@ -84,8 +84,8 @@ int			init(t_app *app, int ac, char **av)
 
 
 	app->current_fractal = JULIA;
-	app->perception_speed = 1.0f;
 	app->update_mouse = 1;
+	app->kMaxIteration = 300;
 	app->mouse_x = 0;
 	app->mouse_y = 0;
 	app->transform.x_shift = 0.0f;

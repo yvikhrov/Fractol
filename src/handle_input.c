@@ -1,5 +1,6 @@
 #include "handle_input.h"
 #include "keys.h"
+#include "clamp.h"
 
 int			key_press(int keycode, void *param)
 {
@@ -12,10 +13,6 @@ int			key_press(int keycode, void *param)
 		quit(app);
 	else if (keycode == KEY_G)
 		app->gradient_coloring = !app->gradient_coloring;
-	else if (keycode == KEY_P)
-		app->perception_speed <<= 1;
-	else if (keycode == KEY_O)
-		app->perception_speed >>= 1;
 	else if (keycode == KEY_OPEN_BRACKET || keycode == KEY_CLOSE_BRACKET)
 	{
 		diff = keycode == KEY_OPEN_BRACKET ? -1 : 1;
@@ -23,7 +20,6 @@ int			key_press(int keycode, void *param)
 	}
 	else if (keycode == KEY_U)
 		app->update_mouse = !app->update_mouse;
-	app->perception_speed = clamp_int(app->perception_speed, 1, 8);
 	app->key_mask[keycode] = 1;
 	return (1);
 }
@@ -69,34 +65,39 @@ int			mouse_position_hook(int x, int y, void *param)
 
 void		handle_input(t_app *app, double dt)
 {
-	if (app->key_mask[KEY_EQUAL])
-		app->transform.zoom *= 2.0f * dt;
-	else if (app->key_mask[KEY_MINUS])
-		app->transform.zoom /= 2.0f * dt;
-	else if (app->key_mask[KEY_LEFT])
-		app->transform.x_shift -= 0.25f * dt / app->transform.zoom;
+	float delta_zoom;
+
+	delta_zoom = clamp_double(app->transform.zoom * dt * 10.0, 1e-16, app->transform.zoom * 0.8);
+	if (app->key_mask[KEY_LEFT])
+		app->transform.x_shift -= 0.5 * dt / app->transform.zoom;
 	else if (app->key_mask[KEY_RIGHT])
-		app->transform.x_shift += 0.25f * dt / app->transform.zoom;
+		app->transform.x_shift += 0.5 * dt / app->transform.zoom;
 	else if (app->key_mask[KEY_UP])
-		app->transform.y_shift -= 0.25f * dt / app->transform.zoom;
+		app->transform.y_shift -= 0.5 * dt / app->transform.zoom;
 	else if (app->key_mask[KEY_DOWN])
-		app->transform.y_shift += 0.25f * dt / app->transform.zoom;
+		app->transform.y_shift += 0.5 * dt / app->transform.zoom;
+	else if (app->key_mask[KEY_I])
+		app->kMaxIteration += 25;
 	else if (app->key_mask[MOUSE_ZOOM_IN])
 	{
-		app->transform.zoom += app->transform.zoom * dt * 10.0f;
-		app->transform.x_shift += (2.0f * app->zoom_mouse_x / app->frame.width - 1.0f) / app->transform.zoom * dt * 10.0f;
-		app->transform.y_shift += (2.0f * app->zoom_mouse_y / app->frame.height - 1.0f) / app->transform.zoom * dt * 10.0f;
+		if (app->transform.zoom > 1e36)
+			return;
+		app->transform.zoom += delta_zoom;
+		app->transform.x_shift += (2.0 * app->zoom_mouse_x / app->frame.width - 1.0) / app->transform.zoom * dt * 10.0;
+		app->transform.y_shift += (2.0 * app->zoom_mouse_y / app->frame.height - 1.0) / app->transform.zoom * dt * 10.0;
 	}
 	else if (app->key_mask[MOUSE_ZOOM_OUT])
 	{
-		app->transform.zoom -= app->transform.zoom * dt * 10.0f;
-		app->transform.x_shift -= (2.0f * app->zoom_mouse_x / app->frame.width - 1.0f) / app->transform.zoom * dt  * 10.0f;
-		app->transform.y_shift -= (2.0f * app->zoom_mouse_y / app->frame.height - 1.0f) / app->transform.zoom * dt * 10.0f;
-//		app->transform.zoom -= app->transform.zoom * dt * 10.0f;
+		if (app->transform.zoom < -1e36)
+			return;
+		app->transform.zoom -= delta_zoom;
+		app->transform.x_shift -= (2.0 * app->zoom_mouse_x / app->frame.width - 1.0) / app->transform.zoom * dt  * 10.0;
+		app->transform.y_shift -= (2.0 * app->zoom_mouse_y / app->frame.height - 1.0) / app->transform.zoom * dt * 10.0;
+//		app->transform.zoom -= app->transform.zoom * dt * 10.0;
 	}
 
 
-	app->hue_min = fmodf(app->hue_min, 360.0f);
-	app->hue_max = fmodf(app->hue_max, 360.0f);
+	app->hue_min = fmodf(app->hue_min, 360.0);
+	app->hue_max = fmodf(app->hue_max, 360.0);
 }
 

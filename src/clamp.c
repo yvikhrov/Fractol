@@ -16,6 +16,14 @@ float			clamp_float(float v, float min, float max)
 		return (min);
 }
 
+double			clamp_double(double v, double min, double max)
+{
+	if (v > min)
+		return ((v < max) ? v : max);
+	else
+		return (min);
+}
+
 t_rgb			clamp_rgb(t_rgb color, float edge0, float edge1)
 {
 	t_rgb result;
