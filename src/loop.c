@@ -12,11 +12,44 @@ typedef struct		s_complex
 	float			re;
 }					t_complex;
 
+cl_float4 init_float4(t_rgb rgb)
+{
+	cl_float4 res;
+
+	res.x = rgb.r;
+	res.y = rgb.g;
+	res.z = rgb.b;
+	res.w = 1.0f;
+	return (res);
+}
+
+void		update_color_preset(t_color *preset, t_app *app)
+{
+	t_rgb	fc;
+	t_rgb	lc;
+	float	coeff;
+	int		i;
+	int		shifted_i;
+
+	shifted_i = ((int)preset->shift + preset->color_num) % preset->color_num;
+	coeff = fabs(fmodf(preset->shift, 1.0f));
+	i = -1;
+	while (++i < preset->color_num)
+	{
+		fc = preset->base_colors[shifted_i];
+		shifted_i = (shifted_i + 1) % preset->color_num;
+		lc = preset->base_colors[shifted_i];
+		preset->colors[i] = init_float4(mix_color(fc, lc, coeff));
+	}
+	clEnqueueWriteBuffer(app->cl.queue, app->cl.color_buffer, CL_TRUE, 0, sizeof(cl_float4) * preset->color_num, preset->colors, 0, NULL, NULL);
+}
+
 void		update(t_app *app)
 {
 	handle_input(app, get_delta_time(&app->timer));
 	app->color_max = hsv2rgb(init_rgb(app->hue_max, 0.9, 0.9));
 	app->color_min = hsv2rgb(init_rgb(app->hue_min, 0.8, 0.6));
+	update_color_preset(&app->color[app->current_preset], app);
 }
 
 void		render(t_app *app)
@@ -33,7 +66,7 @@ void		render(t_app *app)
 	err |= clSetKernelArg(app->cl.kernel[app->current_fractal], 7, sizeof(int), &app->frame.width);
 	err |= clSetKernelArg(app->cl.kernel[app->current_fractal], 8, sizeof(int), &app->frame.height);
 	err |= clSetKernelArg(app->cl.kernel[app->current_fractal], 9, sizeof(int), &app->kMaxIteration);
-	err |= clSetKernelArg(app->cl.kernel[app->current_fractal], 10, sizeof(int), &app->color_num);
+	err |= clSetKernelArg(app->cl.kernel[app->current_fractal], 10, sizeof(int), &app->color[app->current_preset].color_num);
 
 	size_t	global_work_size[] = {app->frame.width, app->frame.height};
 	size_t	local_work_size[] = {16, 16};

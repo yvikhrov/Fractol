@@ -29,4 +29,4 @@ set( SOURCES	ft_bzero.c ft_memset.c ft_memcmp.c ft_memccpy.c ft_memcpy.c ft_atoi
 
 PREPEND(LIBFT_SOURCES src/ ${SOURCES})
 
-ADD_LIBRARY( libft STATIC ${LIBFT_SOURCES})
+ADD_LIBRARY( libft STATIC ${LIBFT_SOURCES} )

@@ -17,6 +17,13 @@ typedef enum		e_fractal
 	MANDELBROT = 0,
 	JULIA,
 	NEWTON,
+	HEART,
+	GOOSE,
+	SHIP,
+	TRICORN,
+	CELTIC,
+	PERP1,
+	PERP2,
 	FRACTAL_NUM
 }					t_fractal;
 
@@ -66,19 +73,33 @@ typedef struct			s_cl
 	cl_mem				color_buffer;
 }						t_cl;
 
+typedef enum			e_color_preset
+{
+	WIKI = 0,
+	TEMPERATURE,
+	COLOR_PRESET_TOTAL
+
+}						t_color_preset;
+
+typedef struct			s_color
+{
+	int					color_num;
+	float				shift;
+	t_rgb				*base_colors;
+	cl_float4			*colors;
+}						t_color;
+
 typedef struct		s_app
 {
 	t_mlx			mlx;
 	t_image			frame;
 	t_transform		transform;
-	int				gradient_coloring;
 	t_rgb			color_max;
 	t_rgb			color_min;
 	float			hue_min;
 	float			hue_max;
 	char			key_mask[282];
 	int				array_size;
-	t_rgb			white_color;
 	t_timer 		timer;
 	int				mouse_x;
 	int				mouse_y;
@@ -88,12 +109,12 @@ typedef struct		s_app
 	t_cl			cl;
 	t_fractal		current_fractal;
 	int				update_mouse;
-	int				color_num;
-	cl_float4		*colors;
+	t_color			color[COLOR_PRESET_TOTAL];
+	t_color_preset	current_preset;
 }					t_app;
 
 
-int                 init(t_app *app, int ac, char **av);
+int                 init(t_app *app);
 int                 parse_map(int fd, t_app *app);
 int	    	        main_loop(void *param);
 
@@ -101,6 +122,7 @@ void				put_pixel(t_app *app, int x, int y, int color);
 
 int					quit(t_app *app);
 void				ft_error(char *err_msg);
+void				init_transform(t_app *app);
 
 t_rgb				mandelbrot_color(t_app *app, int x, int y);
 

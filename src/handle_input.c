@@ -11,8 +11,8 @@ int			key_press(int keycode, void *param)
 	app = (t_app*)param;
 	if (keycode == KEY_ESCAPE)
 		quit(app);
-	else if (keycode == KEY_G)
-		app->gradient_coloring = !app->gradient_coloring;
+	else if (keycode == KEY_R)
+		init_transform(app);
 	else if (keycode == KEY_OPEN_BRACKET || keycode == KEY_CLOSE_BRACKET)
 	{
 		diff = keycode == KEY_OPEN_BRACKET ? -1 : 1;
@@ -93,10 +93,9 @@ void		handle_input(t_app *app, double dt)
 		app->transform.zoom -= delta_zoom;
 		app->transform.x_shift -= (2.0 * app->zoom_mouse_x / app->frame.width - 1.0) / app->transform.zoom * dt  * 10.0;
 		app->transform.y_shift -= (2.0 * app->zoom_mouse_y / app->frame.height - 1.0) / app->transform.zoom * dt * 10.0;
-//		app->transform.zoom -= app->transform.zoom * dt * 10.0;
 	}
-
-
+	else if (app->key_mask[KEY_N] || app->key_mask[KEY_M])
+		app->color[app->current_preset].shift += dt * 2.0f * (app->key_mask[KEY_M] ? 1 : -1);
 	app->hue_min = fmodf(app->hue_min, 360.0);
 	app->hue_max = fmodf(app->hue_max, 360.0);
 }

@@ -27,6 +27,15 @@ void		init_fractal_name(t_cl *cl)
 	cl->kernel_names[MANDELBROT] = ft_strdup("mandelbrot");
 	cl->kernel_names[JULIA] = ft_strdup("julia");
 	cl->kernel_names[NEWTON] = ft_strdup("newton");
+	cl->kernel_names[HEART] = ft_strdup("heart");
+	cl->kernel_names[GOOSE] = ft_strdup("goose");
+	cl->kernel_names[SHIP] = ft_strdup("ship");
+	cl->kernel_names[TRICORN] = ft_strdup("tricorn");
+	cl->kernel_names[CELTIC] = ft_strdup("celtic");
+	cl->kernel_names[PERP1] = ft_strdup("perp1");
+	cl->kernel_names[PERP2] = ft_strdup("perp2");
+
+
 }
 
 size_t        get_file(const char *name, char **str)
@@ -110,7 +119,7 @@ int		init_cl(t_app *app)
 	app->cl.image_buffer = clCreateBuffer(app->cl.context, CL_MEM_READ_WRITE, app->frame.width * app->frame.height * 4, NULL, &err);
 	if (err != CL_SUCCESS)
 		return (-1);
-	app->cl.color_buffer = clCreateBuffer(app->cl.context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(cl_float4) * app->color_num, app->colors, &err);
+	app->cl.color_buffer = clCreateBuffer(app->cl.context, CL_MEM_READ_WRITE, sizeof(cl_float4) * app->color[app->current_preset].color_num, NULL, &err);
 	if (err != CL_SUCCESS)
 		return (-1);
 	return (0);

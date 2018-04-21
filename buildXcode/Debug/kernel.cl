@@ -1,3 +1,4 @@
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #define EPS 1e-4f
 
 __kernel void mandelbrot(
@@ -28,6 +29,314 @@ __kernel void mandelbrot(
 	while (zSquares.x + zSquares.y < 1000.0 && iteration < maxIteration) {
 		iteration++;
 		z.y = 2.0 * z.y * z.x;
+		z.x = zSquares.x - zSquares.y;
+		z += c.yx;
+		zSquares = z * z;
+	}
+	float mu = ((float)iteration - log(log(zSquares.x + zSquares.y) * 0.5) / log(2.0f)) / 10.0f;
+	int integerPart = (int)mu % colorsNum;
+	float fractPart = fmod(mu, 1.0f);
+
+	const float3 bottomColor = colors[integerPart].xyz;
+	const float3 topColor = colors[(integerPart + 1) % colorsNum].xyz;
+
+	uchar3 color = convert_uchar3(mix(bottomColor, topColor, fractPart) * 255.0f);
+
+	imageData[x + y * imageWidth] = (uchar4)(color.zyx, 0);
+}
+
+__kernel void perp1(
+__global uchar4 *imageData,
+__global float4 *colors,
+double zoom,
+double shiftX,
+double shiftY,
+int mouseX,
+int mouseY,
+int imageWidth,
+int imageHeight,
+int maxIteration,
+int colorsNum) {
+
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+	if (x >= imageWidth || y >= imageHeight) {
+		return;
+	}
+
+	double2 c = (double2)((2.0 * y / imageWidth - 1.0) / zoom + shiftY,
+	(2.0 * x / imageHeight - 1.0) / zoom + shiftX);
+	double2 z = (double2)(0.0);
+	double2 zSquares = (double2)(0.0);
+	int iteration = 0;
+
+	while (zSquares.x + zSquares.y < 1000.0 && iteration < maxIteration) {
+		iteration++;
+		z.y = -2.0 * z.y * fabs(z.x);
+		z.x = zSquares.x - zSquares.y;
+		z += c.yx;
+		zSquares = z * z;
+	}
+	float mu = ((float)iteration - log(log(zSquares.x + zSquares.y) * 0.5) / log(2.0f)) / 10.0f;
+	int integerPart = (int)mu % colorsNum;
+	float fractPart = fmod(mu, 1.0f);
+
+	const float3 bottomColor = colors[integerPart].xyz;
+	const float3 topColor = colors[(integerPart + 1) % colorsNum].xyz;
+
+	uchar3 color = convert_uchar3(mix(bottomColor, topColor, fractPart) * 255.0f);
+
+	imageData[x + y * imageWidth] = (uchar4)(color.zyx, 0);
+}
+
+__kernel void perp2(
+__global uchar4 *imageData,
+__global float4 *colors,
+double zoom,
+double shiftX,
+double shiftY,
+int mouseX,
+int mouseY,
+int imageWidth,
+int imageHeight,
+int maxIteration,
+int colorsNum) {
+
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+	if (x >= imageWidth || y >= imageHeight) {
+		return;
+	}
+
+	double2 c = (double2)((2.0 * y / imageWidth - 1.0) / zoom + shiftY,
+	(2.0 * x / imageHeight - 1.0) / zoom + shiftX);
+	double2 z = (double2)(0.0);
+	double2 zSquares = (double2)(0.0);
+	int iteration = 0;
+
+	while (zSquares.x + zSquares.y < 1000.0 && iteration < maxIteration) {
+		iteration++;
+		z.y = -2.0 * z.y * fabs(z.x);
+		z.x = fabs(zSquares.x - zSquares.y);
+		z += c.yx;
+		zSquares = z * z;
+	}
+	float mu = ((float)iteration - log(log(zSquares.x + zSquares.y) * 0.5) / log(2.0f)) / 10.0f;
+	int integerPart = (int)mu % colorsNum;
+	float fractPart = fmod(mu, 1.0f);
+
+	const float3 bottomColor = colors[integerPart].xyz;
+	const float3 topColor = colors[(integerPart + 1) % colorsNum].xyz;
+
+	uchar3 color = convert_uchar3(mix(bottomColor, topColor, fractPart) * 255.0f);
+
+	imageData[x + y * imageWidth] = (uchar4)(color.zyx, 0);
+}
+
+__kernel void celtic(
+__global uchar4 *imageData,
+__global float4 *colors,
+double zoom,
+double shiftX,
+double shiftY,
+int mouseX,
+int mouseY,
+int imageWidth,
+int imageHeight,
+int maxIteration,
+int colorsNum) {
+
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+	if (x >= imageWidth || y >= imageHeight) {
+		return;
+	}
+
+	double2 c = (double2)((2.0 * y / imageWidth - 1.0) / zoom + shiftY,
+	(2.0 * x / imageHeight - 1.0) / zoom + shiftX);
+	double2 z = (double2)(0.0);
+	double2 zSquares = (double2)(0.0);
+	int iteration = 0;
+
+	while (zSquares.x + zSquares.y < 1000.0 && iteration < maxIteration) {
+		iteration++;
+		z.y = 2.0 * z.y * z.x;
+		z.x = fabs(zSquares.x - zSquares.y);
+		z += c.yx;
+		zSquares = z * z;
+	}
+	float mu = ((float)iteration - log(log(zSquares.x + zSquares.y) * 0.5) / log(2.0f)) / 10.0f;
+	int integerPart = (int)mu % colorsNum;
+	float fractPart = fmod(mu, 1.0f);
+
+	const float3 bottomColor = colors[integerPart].xyz;
+	const float3 topColor = colors[(integerPart + 1) % colorsNum].xyz;
+
+	uchar3 color = convert_uchar3(mix(bottomColor, topColor, fractPart) * 255.0f);
+
+	imageData[x + y * imageWidth] = (uchar4)(color.zyx, 0);
+}
+
+__kernel void tricorn(
+__global uchar4 *imageData,
+__global float4 *colors,
+double zoom,
+double shiftX,
+double shiftY,
+int mouseX,
+int mouseY,
+int imageWidth,
+int imageHeight,
+int maxIteration,
+int colorsNum) {
+
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+	if (x >= imageWidth || y >= imageHeight) {
+		return;
+	}
+
+	double2 c = (double2)((2.0 * y / imageWidth - 1.0) / zoom + shiftY,
+	(2.0 * x / imageHeight - 1.0) / zoom + shiftX);
+	double2 z = (double2)(0.0);
+	double2 zSquares = (double2)(0.0);
+	int iteration = 0;
+
+	while (zSquares.x + zSquares.y < 1000.0 && iteration < maxIteration) {
+		iteration++;
+		z.y = -2.0 * z.y * z.x;
+		z.x = zSquares.x - zSquares.y;
+		z += c.yx;
+		zSquares = z * z;
+	}
+	float mu = ((float)iteration - log(log(zSquares.x + zSquares.y) * 0.5) / log(2.0f)) / 10.0f;
+	int integerPart = (int)mu % colorsNum;
+	float fractPart = fmod(mu, 1.0f);
+
+	const float3 bottomColor = colors[integerPart].xyz;
+	const float3 topColor = colors[(integerPart + 1) % colorsNum].xyz;
+
+	uchar3 color = convert_uchar3(mix(bottomColor, topColor, fractPart) * 255.0f);
+
+	imageData[x + y * imageWidth] = (uchar4)(color.zyx, 0);
+}
+
+__kernel void ship(
+__global uchar4 *imageData,
+__global float4 *colors,
+double zoom,
+double shiftX,
+double shiftY,
+int mouseX,
+int mouseY,
+int imageWidth,
+int imageHeight,
+int maxIteration,
+int colorsNum) {
+
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+	if (x >= imageWidth || y >= imageHeight) {
+		return;
+	}
+
+	double2 c = (double2)((2.0 * y / imageWidth - 1.0) / zoom + shiftY,
+	(2.0 * x / imageHeight - 1.0) / zoom + shiftX);
+	double2 z = (double2)(0.0);
+	double2 zSquares = (double2)(0.0);
+	int iteration = 0;
+
+	while (zSquares.x + zSquares.y < 1000.0 && iteration < maxIteration) {
+		iteration++;
+		z.y = -2.0 * fabs(z.y * z.x);
+		z.x = zSquares.x - zSquares.y;
+		z += c.yx;
+		zSquares = z * z;
+	}
+	float mu = ((float)iteration - log(log(zSquares.x + zSquares.y) * 0.5) / log(2.0f)) / 10.0f;
+	int integerPart = (int)mu % colorsNum;
+	float fractPart = fmod(mu, 1.0f);
+
+	const float3 bottomColor = colors[integerPart].xyz;
+	const float3 topColor = colors[(integerPart + 1) % colorsNum].xyz;
+
+	uchar3 color = convert_uchar3(mix(bottomColor, topColor, fractPart) * 255.0f);
+
+	imageData[x + y * imageWidth] = (uchar4)(color.zyx, 0);
+}
+
+__kernel void goose(
+__global uchar4 *imageData,
+__global float4 *colors,
+double zoom,
+double shiftX,
+double shiftY,
+int mouseX,
+int mouseY,
+int imageWidth,
+int imageHeight,
+int maxIteration,
+int colorsNum) {
+
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+	if (x >= imageWidth || y >= imageHeight) {
+		return;
+	}
+
+	double2 c = (double2)((1.0 - 2.0 * y / imageWidth) / zoom - shiftY,
+						  (2.0 * x / imageHeight - 1.0) / zoom + shiftX);
+	double2 z = (double2)(0.0);
+	double2 zSquares = (double2)(0.0);
+	int iteration = 0;
+
+	while (zSquares.x + zSquares.y < 1000.0 && iteration < maxIteration) {
+		iteration++;
+		z.y = -2.0 * fabs(z.y) * z.x;
+		z.x = zSquares.x - zSquares.y;
+		z += c.yx;
+		zSquares = z * z;
+	}
+	float mu = ((float)iteration - log(log(zSquares.x + zSquares.y) * 0.5) / log(2.0f)) / 10.0f;
+	int integerPart = (int)mu % colorsNum;
+	float fractPart = fmod(mu, 1.0f);
+
+	const float3 bottomColor = colors[integerPart].xyz;
+	const float3 topColor = colors[(integerPart + 1) % colorsNum].xyz;
+
+	uchar3 color = convert_uchar3(mix(bottomColor, topColor, fractPart) * 255.0f);
+
+	imageData[x + y * imageWidth] = (uchar4)(color.zyx, 0);
+}
+
+__kernel void heart(
+__global uchar4 *imageData,
+__global float4 *colors,
+double zoom,
+double shiftX,
+double shiftY,
+int mouseX,
+int mouseY,
+int imageWidth,
+int imageHeight,
+int maxIteration,
+int colorsNum) {
+
+	int x = get_global_id(0);
+	int y = get_global_id(1);
+	if (x >= imageWidth || y >= imageHeight) {
+		return;
+	}
+
+	double2 c = (double2)((2.0 * y / imageWidth - 1.0) / zoom + shiftY,
+	(2.0 * x / imageHeight - 1.0) / zoom + shiftX);
+	double2 z = (double2)(0.0);
+	double2 zSquares = (double2)(0.0);
+	int iteration = 0;
+
+	while (zSquares.x + zSquares.y < 1000.0 && iteration < maxIteration) {
+		iteration++;
+		z.y = 2.0 * z.y * fabs(z.x);
 		z.x = zSquares.x - zSquares.y;
 		z += c.yx;
 		zSquares = z * z;
@@ -122,7 +431,7 @@ __kernel void newton(
 	};
 
 	double2 z = (double2)((2.0 * y / imageWidth - 1.0) / zoom + shiftY,
-						(2.0 * x / imageHeight - 1.0) / zoom + shiftX);
+						  (2.0 * x / imageHeight - 1.0) / zoom + shiftX);
 
 	float3 final_color = 0.0;
 	int iteration = 0;

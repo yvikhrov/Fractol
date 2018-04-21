@@ -34,7 +34,7 @@ set( PROJECT_INCLUDES   ${FULL_PATH}/include
 add_subdirectory(libft)
 
 include_directories( ${PROJECT_INCLUDES} )
-ADD_EXECUTABLE( fractol ${PROJECT_SOURCES} )
+ADD_EXECUTABLE( fractol ${PROJECT_SOURCES} buildXcode/Debug/kernel.cl )
 
 TARGET_LINK_LIBRARIES( fractol	libft
 							${FULL_PATH}/libmlx/libmlx.a
