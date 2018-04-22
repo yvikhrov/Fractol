@@ -1,18 +1,18 @@
-NAME = fdf
+NAME = fractol
 
 SRC_PATH = ./src/
 OBJ_PATH = ./obj/
 INC_PATH = ./include/
 LIB_PATH = ./
 
-SRC_NAME =	clamp.c \
+SRC_NAME =	cl.c \
+			clamp.c \
 			color.c \
 			handle_input.c \
 			image.c \
 			init.c \
 			loop.c \
 			main.c \
-			matrix.c \
 			mix.c \
 			parsing.c \
 			timer.c \
@@ -27,7 +27,7 @@ LIB_INC = $(addsuffix /include, $(LIB_FOLDERS))
 
 INC_PATH += $(LIB_INC)
 
-FLAGS = -g -pedantic -Wall -Wextra
+FLAGS = -pedantic -Wall -Wextra -Werror
 CC = clang
 SRC = $(addprefix $(SRC_PATH), $(SRC_NAME))
 OBJ = $(addprefix $(OBJ_PATH), $(OBJ_NAME))
@@ -35,7 +35,7 @@ LIB =	./libft/libft.a \
 		./libmlx/libmlx.a
 INC = $(addprefix -I, $(INC_PATH))
 
-FRAMEWORKS =  -framework OpenGL -framework Appkit
+FRAMEWORKS =  -framework OpenGL -framework Appkit -framework OpenCL
 
 all: $(NAME)
 

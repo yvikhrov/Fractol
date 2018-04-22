@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: admin <admin@student.42.fr>                +#+  +:+       +#+        */
+/*   By: yvikhrov <yvikhrov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/11/05 13:54:35 by yvikhrov          #+#    #+#             */
-/*   Updated: 2018/02/10 12:39:05 by admin            ###   ########.fr       */
+/*   Updated: 2018/04/22 17:53:04 by yvikhrov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ t_vec3				vec3_mult_scalar(t_vec3 vec, float scalar);
 t_vec3				vec3_mult_vec3(t_vec3 vec1, t_vec3 vec2);
 t_vec3				vec3_normalize(t_vec3 vec);
 
-int                 modif_atoi(char *s, char **end_nbr);
-int                 ft_atoi_base(char *s, int base);
+int					modif_atoi(char *s, char **end_nbr);
+int					ft_atoi_base(char *s, int base);
 
 #endif

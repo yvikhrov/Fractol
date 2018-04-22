@@ -1,29 +1,23 @@
-#include "fdf.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   cl.c                                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: yvikhrov <yvikhrov@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/04/22 16:52:44 by yvikhrov          #+#    #+#             */
+/*   Updated: 2018/04/22 18:15:03 by yvikhrov         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#include <stdio.h>
+#include "fractol.h"
 
-//int		read_file(char *path, char **file)
-//{
-//	char	*line;
-//	int		fd;
-//	int		err;
-//
-//	fd = open(path, O_RDONLY);
-//	if (fd < 0)
-//		return (-1);
-//	while ((err = get_next_line(fd, &line)) > 0)
-//	{
-//		if (*file == NULL)
-//			*file = line;
-//		else
-//			*file = ft_strjoin(*file, line);
-//		// LEAKS
-//	}
-//	return (err == -1);
-//}
-
-void		init_fractal_name(t_cl *cl)
+int		init_fractal_kernel(t_cl *cl)
 {
+	int			err;
+	t_fractal	fractal;
+
+	fractal = MANDELBROT;
 	cl->kernel_names[MANDELBROT] = ft_strdup("mandelbrot");
 	cl->kernel_names[JULIA] = ft_strdup("julia");
 	cl->kernel_names[NEWTON] = ft_strdup("newton");
@@ -34,26 +28,15 @@ void		init_fractal_name(t_cl *cl)
 	cl->kernel_names[CELTIC] = ft_strdup("celtic");
 	cl->kernel_names[PERP1] = ft_strdup("perp1");
 	cl->kernel_names[PERP2] = ft_strdup("perp2");
-
-
-}
-
-size_t        get_file(const char *name, char **str)
-{
-	FILE    *file;
-	size_t    len;
-
-	if (!(file = fopen(name, "r")))
-		ft_error("get_file(): open failed");
-	fseek(file, 0, SEEK_END);
-	len = ftell(file);
-	fseek(file, 0, SEEK_SET);
-	if (!(*str = (char*)malloc(sizeof(char) * (len + 1))))
-		ft_error("get_file(): malloc error");
-	fread(*str, len, 1, file);
-	(*str)[len] = '\0';
-	fclose(file);
-	return (len);
+	while (fractal < FRACTAL_NUM)
+	{
+		cl->kernel[fractal] = clCreateKernel(cl->program,
+						cl->kernel_names[fractal], &err);
+		if (!cl->kernel[fractal] || err != CL_SUCCESS)
+			return (-1);
+		++fractal;
+	}
+	return (0);
 }
 
 int		build_program(t_app *app)
@@ -63,63 +46,73 @@ int		build_program(t_app *app)
 	size_t	len;
 	char	buffer[2048];
 
-	len = get_file("kernel.cl", &source);
-	app->cl.program = clCreateProgramWithSource(app->cl.context, 1, (const char **)&source, &len, &err);
+	len = get_file(app, "kernel.cl", &source);
+	if (source == NULL)
+		return (-1);
+	app->cl.program = clCreateProgramWithSource(app->cl.context,
+							1, (const char **)&source, &len, &err);
 	if (!app->cl.program)
 		return (-1);
-	err = clBuildProgram(app->cl.program, 0, NULL, NULL, NULL, NULL);
+	err = clBuildProgram(app->cl.program, 1, &(app->cl.device_id),
+								"-cl-fast-relaxed-math", NULL, NULL);
+	free(source);
 	if (err != CL_SUCCESS)
 	{
 		ft_putstr("Error: Failed to build program executable!\n");
-		clGetProgramBuildInfo(app->cl.program, app->cl.device_id, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
+		clGetProgramBuildInfo(app->cl.program, app->cl.device_id,
+				CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
 		ft_putstr(buffer);
 		return (-1);
 	}
-
-
-
-	t_fractal fractal = MANDELBROT;
-	init_fractal_name(&app->cl);
-	while (fractal < FRACTAL_NUM)
-	{
-		app->cl.kernel[fractal] = clCreateKernel(app->cl.program, app->cl.kernel_names[fractal], &err);
-		if (!app->cl.kernel[fractal] || err != CL_SUCCESS)
-			return (-1);
-		++fractal;
-	}
-
-
-
-	return (0);
+	return (init_fractal_kernel(&app->cl));
 }
 
-void	opencl_error(const char *errinfo, const void *private_info, size_t cb, void *user_data)
+void	opencl_error(const char *errinfo, const void *p, size_t cb, void *u)
 {
-	(void)private_info;
+	(void)p;
 	(void)cb;
-	(void)user_data;
+	(void)u;
 	ft_putendl(errinfo);
+}
+
+int		init_cl_context(t_cl *cl)
+{
+	int err;
+
+	err = clGetDeviceIDs(NULL, CL_DEVICE_TYPE_GPU, 1, &cl->device_id, NULL);
+	if (err != CL_SUCCESS)
+		return (-1);
+	cl->context = clCreateContext(0, 1, &cl->device_id, opencl_error,
+																NULL, &err);
+	if (!cl->context)
+		return (-1);
+	cl->queue = clCreateCommandQueue(cl->context, cl->device_id, 0, &err);
+	if (!cl->queue)
+		return (-1);
+	return (0);
 }
 
 int		init_cl(t_app *app)
 {
 	int err;
+	int max_color_num;
 
-	err = clGetDeviceIDs(NULL, CL_DEVICE_TYPE_GPU, 1, &app->cl.device_id, NULL);
+	err = -1;
+	max_color_num = 1;
+	while (++err < COLOR_PRESET_TOTAL)
+		max_color_num = MAX(max_color_num, app->color[err].color_num);
+	app->cl.global_work_size[0] = app->frame.width;
+	app->cl.global_work_size[1] = app->frame.height;
+	app->cl.local_work_size[0] = 16;
+	app->cl.local_work_size[1] = 16;
+	if (init_cl_context(&app->cl) || build_program(app))
+		return (-1);
+	app->cl.image_buffer = clCreateBuffer(app->cl.context, CL_MEM_READ_WRITE,
+						app->frame.width * app->frame.height * 4, NULL, &err);
 	if (err != CL_SUCCESS)
 		return (-1);
-	app->cl.context = clCreateContext(0, 1, &app->cl.device_id, opencl_error, NULL, &err);
-	if (!app->cl.context)
-		return (-1);
-	app->cl.queue = clCreateCommandQueue(app->cl.context, app->cl.device_id, 0, &err);
-	if (!app->cl.queue)
-		return (-1);
-	if (build_program(app))
-		return (-1);
-	app->cl.image_buffer = clCreateBuffer(app->cl.context, CL_MEM_READ_WRITE, app->frame.width * app->frame.height * 4, NULL, &err);
-	if (err != CL_SUCCESS)
-		return (-1);
-	app->cl.color_buffer = clCreateBuffer(app->cl.context, CL_MEM_READ_WRITE, sizeof(cl_float4) * app->color[app->current_preset].color_num, NULL, &err);
+	app->cl.color_buffer = clCreateBuffer(app->cl.context, CL_MEM_READ_WRITE,
+								sizeof(cl_float4) * max_color_num, NULL, &err);
 	if (err != CL_SUCCESS)
 		return (-1);
 	return (0);

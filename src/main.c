@@ -1,7 +1,19 @@
-#include "fdf.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: yvikhrov <yvikhrov@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/04/22 15:18:17 by yvikhrov          #+#    #+#             */
+/*   Updated: 2018/04/22 18:29:52 by yvikhrov         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "fractol.h"
 #include "handle_input.h"
 
-static t_app	*get_app()
+static t_app	*get_app(void)
 {
 	static t_app *app = NULL;
 
@@ -10,7 +22,7 @@ static t_app	*get_app()
 		app = (t_app*)malloc(sizeof(t_app));
 		ft_memset(app, 0, sizeof(t_app));
 	}
-	return app;
+	return (app);
 }
 
 int				quit(t_app *app)
@@ -23,19 +35,25 @@ int				quit(t_app *app)
 
 static void		print_usage(void)
 {
-	ft_putendl("Usage: ./fractol 'fractal name' ['fractal name']");
+	ft_putendl("Usage: ./fractol 'fractal name'");
 	ft_putendl("List of available fractals:");
-	ft_putendl("Mandelbrot");
-	ft_putendl("Julia");
-	ft_putendl("Newton");
-	ft_putendl("");
+	ft_putendl("- Mandelbrot");
+	ft_putendl("- Julia");
+	ft_putendl("- Newton");
+	ft_putendl("- Heart");
+	ft_putendl("- Goose");
+	ft_putendl("- Ship");
+	ft_putendl("- Tricorn");
+	ft_putendl("- Celtic");
+	ft_putendl("- Perpendicular Mandelbrot");
+	ft_putendl("- Perpendicular Celtic");
 	exit(EXIT_FAILURE);
 }
 
-void check_fractol(char *c, t_app *app)
+void			check_fractol(char *c, t_app *app)
 {
-	int i;
-	char *fractal_name;
+	int		i;
+	char	*fractal_name;
 
 	i = -1;
 	fractal_name = ft_strdup(c);
@@ -52,24 +70,15 @@ void check_fractol(char *c, t_app *app)
 	free(fractal_name);
 }
 
-int		main(int ac, char **av)
+int				main(int ac, char **av)
 {
 	t_app	*app;
-	pid_t	id;
-	char	*s;
 
-	s = NULL;
 	app = get_app();
 	if (ac == 2)
-		s = av[1];
-	else if (ac == 3)
-	{
-		id = fork();
-		s = (id == 0) ? av[2] : av[1];
-	}
+		check_fractol(av[1], app);
 	else
 		print_usage();
-	check_fractol(s, app);
 	if (!init(app))
 		return (0);
 	mlx_mouse_hook(app->mlx.win, mouse_hook, app);

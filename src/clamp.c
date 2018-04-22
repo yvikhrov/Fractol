@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   clamp.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: yvikhrov <yvikhrov@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/04/22 15:18:16 by yvikhrov          #+#    #+#             */
+/*   Updated: 2018/04/22 17:09:07 by yvikhrov         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "clamp.h"
 
 int				clamp_int(int v, int min, int max)
@@ -33,4 +45,3 @@ t_rgb			clamp_rgb(t_rgb color, float edge0, float edge1)
 	result.b = clamp_float(color.b, edge0, edge1);
 	return (result);
 }
-

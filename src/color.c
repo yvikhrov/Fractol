@@ -1,4 +1,16 @@
-#include "fdf.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   color.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: yvikhrov <yvikhrov@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/04/22 15:18:17 by yvikhrov          #+#    #+#             */
+/*   Updated: 2018/04/22 17:09:22 by yvikhrov         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "fractol.h"
 
 t_rgb			init_rgb(float r, float g, float b)
 {
@@ -58,4 +70,3 @@ t_rgb			int_to_rgb(int int_rgb)
 	color.r = (float)((int_rgb >> 16) & 255) / 255.0f;
 	return (color);
 }
-

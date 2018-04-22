@@ -40,6 +40,20 @@ t_gnl	*check_list(t_gnl *head, int fd, t_gnl *tmp1, t_gnl *tmp)
 	}
 }
 
+char	*choose_line(char *line, char *tmp)
+{
+	char	*res;
+
+	if (line)
+	{
+		res = ft_strjoin(line, tmp);
+		free(tmp);
+	}
+	else
+		res = tmp;
+	return (res);
+}
+
 int		write_line(t_gnl *gnl, char **line, int flag)
 {
 	char	buf[BUFF_SIZE + 1];
@@ -54,8 +68,7 @@ int		write_line(t_gnl *gnl, char **line, int flag)
 		if ((s = ft_strchr(buf, '\n')))
 		{
 			tmp = ft_strsub(buf, 0, s - buf);
-			*line = *line ? ft_strjoin(*line, tmp) : tmp;
-			free(tmp);
+			*line = choose_line(*line, tmp);
 			if (ret - (s - buf + 1) > 0)
 				gnl->buf = ft_strsub(buf, s - buf + 1, ret - (s - buf + 1));
 			return (1);
